@@ -1,3 +1,4 @@
+import "./app.css";
 import CurrencyPairSelector from "./components/currencyPairSelector";
 import OrderBook from "./components/orderBook";
 import TradeHistory from "./components/tradeHistory";
@@ -8,11 +9,10 @@ function App() {
     <div>
       <h1>CoinRoutes Frontend Test</h1>
       <CurrencyPairSelector />
-      <div style={{ display: "flex", gap: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-around" }}>
         <OrderBook />
-        {/* https://mui.com/x/react-charts/bars/ */}
         {/* <PriceChart /> */}
-        <TradeHistory />
+        {/* <TradeHistory /> */}
       </div>
     </div>
   );
