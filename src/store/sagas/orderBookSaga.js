@@ -1,6 +1,6 @@
 import { call, put, cancelled, take, cancel, fork } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
-import { SUBSCRIBE_CURRENCY_PAIR, setOrderBook, updateOrderBook, saveCurrencyPair } from '../actions/orderBookActions';
+import { SUBSCRIBE_CURRENCY_PAIR, setOrderBook, updateOrderBook, saveCurrencyPair, resetOrderBook } from '../actions/orderBookActions';
 import { getWebSocketAuth } from '../../utils';
 import { COINBASE_SOCKET_URL } from '../../config';
 
@@ -11,7 +11,6 @@ const passphrase = import.meta.env.VITE_COINBASE_PASSPHRASE;
 function createWebSocketChannel(currencyPair) {
   return eventChannel((emit) => {
     const timestamp = Math.floor(Date.now() / 1000).toString();
-
     const signature = getWebSocketAuth(timestamp);
 
     const subscribeMessage = JSON.stringify({
@@ -32,7 +31,6 @@ function createWebSocketChannel(currencyPair) {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      // console.log(data);
       if (data.type === 'snapshot') {
         emit(setOrderBook(data));
       } else if (data.type === 'l2update') {
@@ -54,8 +52,10 @@ function createWebSocketChannel(currencyPair) {
         product_ids: [currencyPair],
         channels: ['level2'],
       });
-      socket.send(unsubscribeMessage);
-      socket.close();
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(unsubscribeMessage);
+        socket.close();
+      }
     };
 
     return unsubscribe;
@@ -85,6 +85,7 @@ function* subscribeCurrencyPairSaga() {
     if (currentTask) {
       yield cancel(currentTask);
     }
+    yield put(resetOrderBook());
     currentTask = yield fork(handleCurrencyPairSubscription, action);
   }
 }

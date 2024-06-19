@@ -1,0 +1,32 @@
+.trade-history {
+  border: 1px solid #ccc;
+  width: 300px;
+  height: 800px;
+  padding: 6px;
+}
+
+.trade-history-row {
+  display: flex;
+  justify-content: space-around;
+}
+
+.trade-history-header {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 22px;
+}
+
+.trade-history-header-title-element {
+  margin: 0;
+  width: 80px;
+}
+.trade-history-header-title-element h5 {
+  margin: 0;
+}
+
+.trade-history-size,
+.trade-history-price,
+.trade-history-time {
+  font-size: 14px;
+  width: 80px;
+}

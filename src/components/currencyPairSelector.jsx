@@ -16,7 +16,8 @@ const CurrencyPairSelector = () => {
   useEffect(() => {
     dispatch(subscribeCurrencyPair(selectedPair));
     dispatch(subscribeTradeHistory(selectedPair));
-  }, []);
+  }, [selectedPair, dispatch]);
+
   return (
     <select value={selectedPair} onChange={handleChange}>
       <option value="ETH-USD">ETH-USD</option>

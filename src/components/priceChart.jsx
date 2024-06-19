@@ -1,185 +1,80 @@
-import React, { useEffect, useRef } from "react";
-import { Chart, registerables } from "chart.js";
-import "chartjs-adapter-date-fns";
-import {
-  CandlestickController,
-  CandlestickElement,
-  OhlcController,
-  OhlcElement,
-} from "chartjs-chart-financial";
-import streamingPlugin from "chartjs-plugin-streaming";
-import { Chart as ReactChart } from "react-chartjs-2";
-import { COINBASE_SOCKET_URL } from "../config";
-import { getWebSocketAuth } from "../utils";
+import React, { useEffect, useState } from "react";
+import Plot from "react-plotly.js";
 import { useSelector } from "react-redux";
-
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from 'recharts';
-
-// Mock data
-const mockData = [
-  { time: '22:50:00', bids: 9400, asks: 9200 },
-  { time: '22:50:15', bids: 9400, asks: 9250 },
-  { time: '22:50:30', bids: 9400, asks: 9250 },
-  { time: '22:50:45', bids: 9400, asks: 9250 },
-  { time: '22:51:00', bids: 9450, asks: 9300 },
-  { time: '22:51:15', bids: 9500, asks: 9350 },
-  { time: '22:51:30', bids: 9600, asks: 9400 },
-  { time: '22:51:45', bids: 9550, asks: 9300 },
-];
-Chart.register(
-  ...registerables,
-  CandlestickController,
-  CandlestickElement,
-  OhlcController,
-  OhlcElement,
-  streamingPlugin
-);
-
-const apiKey = import.meta.env.VITE_COINBASE_API_KEY;
-const passphrase = import.meta.env.VITE_COINBASE_PASSPHRASE;
+import { formatDate, calculateBestBid, calculateBestAsk } from "../utils";
+import "../styles/priceChart.css";
 
 const PriceChart = () => {
-  const chartRef = useRef(null);
+  const orderBooks = useSelector((state) => state.orderBooks);
   const currencyPair = useSelector((state) => state.orderBooks.currencyPair);
 
-  // useEffect(() => {
-  //   const chart = chartRef.current;
+  const [data, setData] = useState([]);
+  const [bestAsk, setBestAsk] = useState(0);
+  const [bestBid, setBestBid] = useState(0);
 
-  //   const socket = new WebSocket(COINBASE_SOCKET_URL);
-  //   const timestamp = Math.floor(Date.now() / 1000).toString();
-  //   const signature = getWebSocketAuth(timestamp);
+  useEffect(() => {
+    const bestAsk = calculateBestAsk(orderBooks.asks);
+    const bestBid = calculateBestBid(orderBooks.bids);
+    setBestAsk(bestAsk);
+    setBestBid(bestBid);
+  }, [currencyPair, orderBooks]);
 
-  //   const subscribeMessage = JSON.stringify({
-  //     type: "subscribe",
-  //     product_ids: [currencyPair],
-  //     channels: ["level2"],
-  //     signature: signature,
-  //     key: apiKey,
-  //     passphrase: passphrase,
-  //     timestamp: timestamp,
-  //   });
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (orderBooks.bids.length > 0 && orderBooks.asks.length > 0) {
+        const newData = {
+          time: formatDate(new Date()),
+          bids: parseFloat(orderBooks.bids[0][0]),
+          asks: parseFloat(orderBooks.asks[0][0]),
+        };
+        setData((prevData) => [...prevData.slice(-10), newData]);
+      }
+    }, 500);
 
-  //   socket.onopen = () => {
-  //     console.log("WebSocket connection opened");
-  //     socket.send(subscribeMessage);
-  //   };
-  //   // {"type":"l2update","product_id":"BTC-USD","changes":[["sell","0.01","3153.33333334"]],"time":"2024-06-19T10:34:56.969556Z"}
-  //   socket.onmessage = (event) => {
-  //     const data = JSON.parse(event.data);
-  //     // console.log(data);
-  //     if (data.type === "l2update" && chart) {
-  //       const newTime = Date.now();
-  //       const newPrice = parseFloat(data.changes[0][1]);
+    return () => clearInterval(interval);
+  }, [orderBooks]);
 
-  //       const dataEntry = {
-  //         x: newTime,
-  //         o: newPrice,
-  //       };
-
-  //       if (data.changes[0][0].toUpperCase() === "BUY") {
-  //         chart.data.datasets[0].data.push(dataEntry);
-  //       } else if (data.changes[0][0] === "SELL") {
-  //         chart.data.datasets[1].data.push(dataEntry);
-  //       }
-  //       chart.update("quiet");
-  //     }
-  //   };
-
-  //   socket.onclose = () => {
-  //     console.log("WebSocket connection closed");
-  //   };
-
-  //   socket.onerror = (error) => {
-  //     console.error("WebSocket error:", error);
-  //   };
-
-  //   return () => {
-  //     socket.close();
-  //   };
-  // }, [currencyPair]);
-
-  const data = {
-    datasets: [
-      {
-        label: "Buy",
-        data: [],
-        type: "line",
-      },
-      {
-        label: "Sell",
-        data: [],
-        type: "line",
-        borderColor: "red",
-        borderWidth: 2,
-        pointRadius: 0,
-        fill: false,
-        spanGaps: true,
-      },
-    ],
-  };
-
-  const options = {
-    plugins: {
-      streaming: {
-        duration: 60000,
-        refresh: 1000,
-        delay: 1000,
-      },
-      legend: {
-        display: true,
-      },
-    },
-    scales: {
-      x: {
-        type: "realtime",
-        realtime: {
-          duration: 60000,
-          refresh: 1000,
-          delay: 1000,
-        },
-        title: {
-          display: true,
-          text: "Time",
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: "Price",
-        },
-      },
-    },
-  };
+  const times = data.map((item) => item.time);
+  const bids = data.map((item) => item.bids);
+  const asks = data.map((item) => item.asks);
 
   return (
-    <div className="chart-container">
-      <ResponsiveContainer width="100%" height={400}>
-        <LineChart data={mockData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="time" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="bids" stroke="#8884d8" />
-          <Line type="monotone" dataKey="asks" stroke="#ff7300" />
-        </LineChart>
-      </ResponsiveContainer>
-      {/* <h3>Real-time Price Chart</h3>
-      <ReactChart
-        ref={chartRef}
-        type="candlestick"
-        data={data}
-        options={options}
-      /> */}
+    <div className="price-chart">
+      <div className="best-prices">
+        <div className="best-prices-item bg-orange">
+          <span className="best-ask">Best Ask: {bestAsk}</span>
+        </div>
+        <div className="best-prices-item bg-blue">
+          <span className="best-bid">Best Bid: {bestBid}</span>
+        </div>
+      </div>
+      <Plot
+        data={[
+          {
+            x: times,
+            y: bids,
+            type: "scatter",
+            mode: "lines",
+            name: "Bids",
+            line: { color: "blue" },
+          },
+          {
+            x: times,
+            y: asks,
+            type: "scatter",
+            mode: "lines",
+            name: "Asks",
+            line: { color: "orange" },
+          },
+        ]}
+        layout={{
+          width: 800,
+          height: 400,
+          title: "Real-time Bids and Asks",
+          xaxis: { title: "Time" },
+          yaxis: { title: "Price", dtick: 0.9, nticks: 1, tickmode: "array" },
+        }}
+      />
     </div>
   );
 };

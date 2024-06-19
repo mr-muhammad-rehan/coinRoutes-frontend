@@ -8,11 +8,15 @@ function App() {
   return (
     <div>
       <h1>CoinRoutes Frontend Test</h1>
-      <CurrencyPairSelector />
-      <div style={{ display: "flex", justifyContent: "space-around" }}>
+      <hr />
+      <div className="price-selection">
+        <CurrencyPairSelector />
+      </div>
+      <hr />
+      <div className="home-container">
         <OrderBook />
-        {/* <PriceChart /> */}
-        {/* <TradeHistory /> */}
+        <PriceChart />
+        <TradeHistory />
       </div>
     </div>
   );

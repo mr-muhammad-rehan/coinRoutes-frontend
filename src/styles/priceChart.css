@@ -1,0 +1,33 @@
+.price-chart {
+  display: flex;
+  flex-direction: column;
+}
+
+.best-prices-item {
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.best-prices {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 50px;
+}
+
+.best-ask {
+  color: white;
+}
+
+.best-bid {
+  color: white;
+}
+
+.bg-blue {
+  background-color: #8ecae6;
+}
+
+.bg-orange {
+  background-color: #ffb703;
+}

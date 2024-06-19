@@ -10,8 +10,6 @@ const passphrase = import.meta.env.VITE_COINBASE_PASSPHRASE;
 function createWebSocketChannel(currencyPair) {
     return eventChannel((emit) => {
         const timestamp = Math.floor(Date.now() / 1000).toString();
-
-
         const signature = getWebSocketAuth(timestamp);
 
         const subscribeMessage = JSON.stringify({
@@ -32,7 +30,6 @@ function createWebSocketChannel(currencyPair) {
 
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            // console.log(data);
             if (data.type === 'match') {
                 emit(updateTradeHistory(data));
             }
@@ -52,8 +49,10 @@ function createWebSocketChannel(currencyPair) {
                 product_ids: [currencyPair],
                 channels: ['matches'],
             });
-            socket.send(unsubscribeMessage);
-            socket.close();
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(unsubscribeMessage);
+                socket.close();
+            }
         };
 
         return unsubscribe;
