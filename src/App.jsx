@@ -7,7 +7,7 @@ import PriceChart from "./components/priceChart";
 function App() {
   return (
     <div>
-      <h1>CoinRoutes Frontend Test</h1>
+      <h1 style={{ color: "white", display: "flex", justifyContent: "center" }}>CoinRoutes Frontend Test</h1>
       <hr />
       <div className="price-selection">
         <CurrencyPairSelector />
@@ -17,6 +17,10 @@ function App() {
         <OrderBook />
         <PriceChart />
         <TradeHistory />
+      </div>
+
+      <div className="footer">
+        <span>All Rights Reserved. Coin Routes © 2024</span>
       </div>
     </div>
   );

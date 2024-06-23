@@ -1,34 +1,24 @@
 import React, { useEffect, useState } from "react";
 import Plot from "react-plotly.js";
 import { useSelector } from "react-redux";
-import { formatDate, calculateBestBid, calculateBestAsk } from "../utils";
+import BestOrder from "./bestOrder";
+import { formatDate } from "../utils";
 import "../styles/priceChart.css";
 
 const PriceChart = () => {
   const orderBooks = useSelector((state) => state.orderBooks);
-  const currencyPair = useSelector((state) => state.orderBooks.currencyPair);
+  const { bestAsk, bestBid } = useSelector((state) => state.orderBooks);
 
   const [data, setData] = useState([]);
-  const [bestAsk, setBestAsk] = useState(0);
-  const [bestBid, setBestBid] = useState(0);
-
-  useEffect(() => {
-    const bestAsk = calculateBestAsk(orderBooks.asks);
-    const bestBid = calculateBestBid(orderBooks.bids);
-    setBestAsk(bestAsk);
-    setBestBid(bestBid);
-  }, [currencyPair, orderBooks]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (orderBooks.bids.length > 0 && orderBooks.asks.length > 0) {
-        const newData = {
-          time: formatDate(new Date()),
-          bids: parseFloat(orderBooks.bids[0][0]),
-          asks: parseFloat(orderBooks.asks[0][0]),
-        };
-        setData((prevData) => [...prevData.slice(-10), newData]);
-      }
+      const newData = {
+        time: formatDate(new Date()),
+        bids: bestBid.amount,
+        asks: bestAsk.amount,
+      };
+      setData((prevData) => [...prevData.slice(-20), newData]);
     }, 500);
 
     return () => clearInterval(interval);
@@ -40,13 +30,9 @@ const PriceChart = () => {
 
   return (
     <div className="price-chart">
-      <div className="best-prices">
-        <div className="best-prices-item bg-orange">
-          <span className="best-ask">Best Ask: {bestAsk}</span>
-        </div>
-        <div className="best-prices-item bg-blue">
-          <span className="best-bid">Best Bid: {bestBid}</span>
-        </div>
+      <div className="best-orders">
+        <BestOrder amount={bestAsk.amount} size={bestAsk.size} type={"Ask"} />
+        <BestOrder amount={bestBid.amount} size={bestBid.size} type={"Bid"} />
       </div>
       <Plot
         data={[
@@ -54,7 +40,7 @@ const PriceChart = () => {
             x: times,
             y: bids,
             type: "scatter",
-            mode: "lines",
+             mode: "lines+markers",
             name: "Bids",
             line: { color: "blue" },
           },
@@ -62,7 +48,7 @@ const PriceChart = () => {
             x: times,
             y: asks,
             type: "scatter",
-            mode: "lines",
+             mode: "lines+markers",
             name: "Asks",
             line: { color: "orange" },
           },
@@ -70,9 +56,42 @@ const PriceChart = () => {
         layout={{
           width: 800,
           height: 400,
-          title: "Real-time Bids and Asks",
-          xaxis: { title: "Time" },
-          yaxis: { title: "Price", dtick: 0.9, nticks: 1, tickmode: "array" },
+          title: {
+            text: "Real-time Bids and Asks",
+            font: {
+              color: "white",
+            },
+          },
+          paper_bgcolor: "#151518",
+          plot_bgcolor: "#151518",
+          xaxis: {
+            title: {
+              text: "Time",
+              font: {
+                color: "white",
+              },
+            },
+            color: "white",
+            gridcolor: "gray",
+          },
+          yaxis: {
+            title: {
+              text: "Price",
+              font: {
+                color: "white",
+              },
+            },
+            color: "white",
+            gridcolor: "gray",
+            dtick: 0.9,
+            nticks: 1,
+            tickmode: "array",
+          },
+          legend: {
+            font: {
+              color: "white",
+            },
+          },
         }}
       />
     </div>

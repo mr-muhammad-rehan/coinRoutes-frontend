@@ -1,0 +1,20 @@
+/* HTML: <div class="loader"></div> */
+.loader {
+    width: 45px; 
+    aspect-ratio: 1;
+    --c: no-repeat linear-gradient(#ffb703 0 0);
+    background: 
+      var(--c) 0    0,
+      var(--c) 0    100%, 
+      var(--c) 50%  0,  
+      var(--c) 50%  100%, 
+      var(--c) 100% 0, 
+      var(--c) 100% 100%;
+    animation: l11 1s infinite linear;
+  }
+  @keyframes l11 {
+   80% {background-size:20% 30%}
+   0%,
+   90%,
+   100%{background-size:20% 50%}
+  }

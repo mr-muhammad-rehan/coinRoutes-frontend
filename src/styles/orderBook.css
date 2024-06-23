@@ -1,71 +1,85 @@
 .order-book {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .order-book-container {
-    border: 1px solid #ccc;
-    width: 300px;
-    height: 800px;
-    padding: 6px;
-  }
-  
-  .order-book-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  
-  .order-book-list {
-    overflow-y: scroll;
-    height: 700px;
-  }
-  
-  .order-book-header {
-    display: flex;
-    justify-content: space-around;
-  }
-  
-  .order-book-bids {
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
-    height: 300px;
-    overflow-y: scroll;
-  }
-  
-  .order-book-asks {
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-    height: 300px;
-    overflow-y: scroll;
-  }
-  
-  .order-book-row {
-    display: flex;
-    justify-content: space-around;
-    align-items: end;
-  }
-  
-  .order-book-size,
-  .order-book-price,
-  .order-book-my-size {
-    font-size: 14px;
-    width: 80px;
-  }
-  
-  .order-book-spread {
-    text-align: center;
-    border: 1px solid #ccc;
-  }
-  
-  .aggregation-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border: 1px solid #ccc;
-    width: 292px;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  background-color: #151518;
+}
+
+.order-book-container {
+  border: 1px solid #ccc;
+  width: 250px;
+  height: 600px;
+  padding: 6px;
+  color: white;
+}
+
+.order-book-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.order-book-list {
+  overflow-y: scroll;
+  height: 700px;
+}
+
+.order-book-header {
+  display: flex;
+  justify-content: space-around;
+}
+
+.order-book-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 180px;
+  align-items: center;
+}
+
+.order-book-bids {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  height: 180px;
+}
+
+.order-book-asks {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  height: 180px;
+}
+
+.order-book-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: end;
+}
+
+.order-book-size,
+.order-book-price,
+.order-book-my-size {
+  font-size: 14px;
+  width: 80px;
+  color: white;
+}
+
+.order-book-spread {
+  text-align: center;
+  border: 1px solid #ccc;
+  color: white;
+}
+
+.aggregation-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  /* width: 292px; */
+  color: white;
+}
+
+button {
+  background-color: #ffffff; 
+}

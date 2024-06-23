@@ -1,8 +1,16 @@
+import "../styles/currencyPair.css";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { subscribeCurrencyPair } from "../store/actions/orderBookActions";
-import { subscribeTradeHistory } from "../store/actions/tradeHistoryActions";
 import { DEFAULT_CURRENCY_PAIR } from "../config";
+
+const AVAILABLE_CURRENCY = [
+  "ETH-USD",
+  "ETH-BTC",
+  "BTC-USD",
+  "LTC-USD",
+  "BCH-USD",
+];
 
 const CurrencyPairSelector = () => {
   const [selectedPair, setSelectedPair] = useState(DEFAULT_CURRENCY_PAIR);
@@ -15,16 +23,15 @@ const CurrencyPairSelector = () => {
 
   useEffect(() => {
     dispatch(subscribeCurrencyPair(selectedPair));
-    dispatch(subscribeTradeHistory(selectedPair));
   }, [selectedPair, dispatch]);
 
   return (
     <select value={selectedPair} onChange={handleChange}>
-      <option value="ETH-USD">ETH-USD</option>
-      <option value="ETH-BTC">ETH-BTC</option>
-      <option value="BTC-USD">BTC-USD</option>
-      <option value="LTC-USD">LTC-USD</option>
-      <option value="BCH-USD">BCH-USD</option>
+      {AVAILABLE_CURRENCY.map((currency, key) => (
+        <option key={key} value={currency}>
+          {currency}
+        </option>
+      ))}
     </select>
   );
 };
