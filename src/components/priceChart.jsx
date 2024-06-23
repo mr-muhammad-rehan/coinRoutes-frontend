@@ -42,7 +42,7 @@ const PriceChart = () => {
             type: "scatter",
              mode: "lines+markers",
             name: "Bids",
-            line: { color: "blue" },
+            line: { color: "#41BBFF" },
           },
           {
             x: times,
@@ -50,12 +50,12 @@ const PriceChart = () => {
             type: "scatter",
              mode: "lines+markers",
             name: "Asks",
-            line: { color: "orange" },
+            line: { color: "#ffb703" },
           },
         ]}
         layout={{
           width: 800,
-          height: 400,
+          height: 570,
           title: {
             text: "Real-time Bids and Asks",
             font: {

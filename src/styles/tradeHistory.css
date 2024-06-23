@@ -46,4 +46,5 @@
 
 .trade-history-price{
   width: 100px;
+  text-wrap: nowrap;
 }

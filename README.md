@@ -1,8 +1,34 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# CoinRoutes Front-end Test
 
-Currently, two official plugins are available:
+### How to use
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## Run Locally  
+Clone the project  
+
+~~~bash  
+  git clone https://github.com/mr-muhammad-rehan/coinRoutes-frontend.git
+~~~
+
+Go to the project directory  
+
+~~~bash  
+  cd coinRoutes-frontend
+~~~
+
+Install dependencies  
+
+~~~bash  
+npm install
+~~~
+
+Start the server  
+
+~~~bash  
+npm run dev
+~~~  
+
+# Screen
+
+![Screen Shot](./screen.png)
