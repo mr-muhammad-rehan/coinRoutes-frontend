@@ -1,6 +1,4 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { subscribeTradeHistory } from "../store/actions/tradeHistoryActions";
+import { useDispatch, useSelector } from "react-redux"; 
 import { formatDate } from "../utils";
 import "../styles/tradeHistory.css";
 import LoadingBar from "./loadingBar";
@@ -10,10 +8,7 @@ const TradeHistory = () => {
   const tradeHistory = useSelector((state) => state.tradeHistory.tradeHistory);
   const currencyPair = useSelector((state) => state.orderBooks.currencyPair);
 
-  useEffect(() => {
-    dispatch(subscribeTradeHistory(currencyPair));
-  }, [currencyPair, dispatch]);
-
+ 
   return (
     <div className="trade-history">
       <h3>Trade History</h3>

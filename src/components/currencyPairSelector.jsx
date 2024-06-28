@@ -1,7 +1,7 @@
 import "../styles/currencyPair.css";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { subscribeCurrencyPair } from "../store/actions/orderBookActions";
+import { setCurrencyPair } from "../store/actions/orderBookActions";
 import { DEFAULT_CURRENCY_PAIR } from "../config";
 
 const AVAILABLE_CURRENCY = [
@@ -17,12 +17,12 @@ const CurrencyPairSelector = () => {
   const dispatch = useDispatch();
 
   const handleChange = (event) => {
+    setCurrencyPair(event.target.value); 
     setSelectedPair(event.target.value);
-    dispatch(subscribeCurrencyPair(event.target.value));
   };
 
   useEffect(() => {
-    dispatch(subscribeCurrencyPair(selectedPair));
+    dispatch(setCurrencyPair(selectedPair));
   }, [selectedPair, dispatch]);
 
   return (

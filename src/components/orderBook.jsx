@@ -26,9 +26,9 @@ const OrderBook = () => {
     }
 
     const aggregatedOrderBids = aggregateOrderBook(bids, aggregation);
-    const aggregatedOrderAsks = aggregateOrderBook(bids, aggregation);
-    setAggregatedBids(aggregatedOrderBids.slice(0, 10));
-    setAggregatedAsks(aggregatedOrderAsks.slice(0, 10));
+    const aggregatedOrderAsks = aggregateOrderBook(asks, aggregation);
+    setAggregatedBids(aggregatedOrderBids.slice(0, 14));
+    setAggregatedAsks(aggregatedOrderAsks.slice(0, 14));
     calculateSpread();
   }, [bids, asks, aggregation]);
 
