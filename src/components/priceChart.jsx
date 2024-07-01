@@ -5,26 +5,25 @@ import BestOrder from "./bestOrder";
 import { formatDate } from "../utils";
 import "../styles/priceChart.css";
 
-const PriceChart = () => {
-  const { bestAsk, bestBid } = useSelector(
-    (state) => state.orderBooks
-  );
+const PriceChart = ({ isConnected }) => {
+  const { bestAsk, bestBid } = useSelector((state) => state.orderBooks);
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const newData = {
-        time: formatDate(new Date()),
-        bids: bestBid.amount,
-        asks: bestAsk.amount,
-      };
-      setData((prevData) => [...prevData.slice(-50), newData]);
-    }, 500);
+    let interval;
+    if (isConnected) {
+      interval = setInterval(() => {
+        const newData = {
+          time: formatDate(new Date().getTime()),
+          bids: bestBid.amount,
+          asks: bestAsk.amount,
+        };
+        setData((prevData) => [...prevData.slice(-50), newData]);
+      }, 500);
+    }
 
     return () => clearInterval(interval);
-  }, [bestAsk.amount, bestBid.amount]);
-
-
+  }, [bestAsk.amount, bestBid.amount, isConnected]);
 
   const times = useMemo(() => data.map((item) => item.time), [data]);
   const _bids = useMemo(() => data.map((item) => item.bids), [data]);

@@ -10,7 +10,7 @@ export function getOrderBookSubMessage({ currencyPair, channels = ['level2_batch
     let subscription = {
         type: 'subscribe',
         product_ids: [currencyPair],
-        channels: channels,
+        channels: [...channels],
     };
 
     if (environment === SYSTEM_ENVIRONMENT.MAIN_NET) {

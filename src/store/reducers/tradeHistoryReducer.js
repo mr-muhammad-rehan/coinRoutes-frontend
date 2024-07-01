@@ -24,7 +24,6 @@ const tradeHistoryReducer = (state = initialState, action) => {
     case RESET_TRADE_HISTORY:
       return {
         ...initialState,
-        isLoading: false,
       };
     default:
       return state;

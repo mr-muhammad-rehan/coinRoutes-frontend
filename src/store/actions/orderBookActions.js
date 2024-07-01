@@ -24,6 +24,7 @@ export const resetOrderBook = () => ({
   type: RESET_ORDER_BOOK,
 });
 
-export const setEnvironment = () => ({
+export const setEnvironment = (environment) => ({
   type: SET_ENVIRONMENT,
+  payload: environment
 });

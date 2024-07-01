@@ -16,7 +16,7 @@ const initialState = {
   },
   currencyPair: DEFAULT_CURRENCY_PAIR,
   isLoading: true,
-  systemEnvironment: SYSTEM_ENVIRONMENT.TEST_NET
+  systemEnvironment: SYSTEM_ENVIRONMENT.MAIN_NET
 };
 
 const orderBookReducer = (state = initialState, action) => {
@@ -44,9 +44,11 @@ const orderBookReducer = (state = initialState, action) => {
       };
     case RESET_ORDER_BOOK:
       const currency = state.currencyPair;
+      const systemEnvironment = state.systemEnvironment;
       return {
         ...initialState,
         isLoading: false,
+        systemEnvironment: systemEnvironment,
         currencyPair: currency
       };
     case SET_BEST_ORDER_BOOK:

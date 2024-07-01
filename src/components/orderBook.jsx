@@ -1,10 +1,11 @@
+import "../styles/orderBook.css";
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import LoadingBar from "./loadingBar";
 import { aggregateOrderBook, calculateAggregationRange } from "../utils";
-import "../styles/orderBook.css";
+import OrderBookRow from './orderBookRow';
 
-const DEFAULT_AGGREGATION_AMOUNT = 0.00001;
+const DEFAULT_AGGREGATION_AMOUNT = 0.0;
 
 const OrderBook = () => {
   const { bids, asks, bestAsk, bestBid, currencyPair, isLoading } = useSelector(
@@ -20,14 +21,25 @@ const OrderBook = () => {
 
   useEffect(() => {
     const newAggregationRange = calculateAggregationRange(bids, asks);
-    if (newAggregationRange != 0) {
+    if (parseFloat(newAggregationRange) != 0) {
       setAggregationAmount(newAggregationRange);
+    } else {
+      setAggregationAmount(0);
     }
+  }, [bids, asks]);
 
-    const aggregatedOrderBids = aggregateOrderBook(bids, aggregation);
-    const aggregatedOrderAsks = aggregateOrderBook(asks, aggregation);
-    setAggregatedBids(aggregatedOrderBids.slice(0, 14));
-    setAggregatedAsks(aggregatedOrderAsks.slice(0, 14));
+  useEffect(() => {
+    //check if aggregation amount is not zero
+    if (aggregation > 0) {
+      const aggregatedOrderBids = aggregateOrderBook(bids, aggregation);
+      const aggregatedOrderAsks = aggregateOrderBook(asks, aggregation);
+      setAggregatedBids(aggregatedOrderBids.slice(0, 14));
+      setAggregatedAsks(aggregatedOrderAsks.slice(0, 14));
+    } else {
+      //if aggregation is zero no need to calculate
+      setAggregatedBids(bids.slice(0, 14));
+      setAggregatedAsks(asks.slice(0, 14));
+    }
     calculateSpread();
   }, [bids, asks, aggregation]);
 
@@ -94,19 +106,5 @@ const OrderBook = () => {
   );
 };
 
-const OrderBookRow = ({ orders, priceColor = "black" }) => (
-  <div>
-    {orders.map((order, index) => (
-      <div className="order-book-row" key={`order-${index}`}>
-        <span className="order-book-size">
-          {Number(order.marketSize).toFixed(6)}
-        </span>
-        <span className="order-book-price" style={{ color: priceColor }}>
-          {Number(order.price).toFixed(4)}
-        </span>
-      </div>
-    ))}
-  </div>
-);
-
+ 
 export default OrderBook;

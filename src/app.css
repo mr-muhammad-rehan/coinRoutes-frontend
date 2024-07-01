@@ -38,13 +38,13 @@ hr {
 
 @keyframes glow {
   0% {
-    box-shadow: 0 0 5px red;
+    box-shadow: 0 0 5px var(--glow-color);
   }
   50% {
-    box-shadow: 0 0 20px red;
+    box-shadow: 0 0 20px var(--glow-color);
   }
   100% {
-    box-shadow: 0 0 5px red;
+    box-shadow: 0 0 5px var(--glow-color);
   }
 }
 
@@ -54,7 +54,8 @@ hr {
   background-color: red;
   border-radius: 50%;
   position: relative;
-  box-shadow: 0 0 10px red;
+  --glow-color: red;
+  box-shadow: 0 0 10px var(--glow-color);
   animation: glow 1.5s infinite;
 }
 
@@ -64,6 +65,17 @@ hr {
   background-color: green;
   border-radius: 50%;
   position: relative;
-  box-shadow: 0 0 10px green;
+  --glow-color: green;
+  box-shadow: 0 0 10px var(--glow-color);
   animation: glow 1.5s infinite;
+}
+
+.connection-status {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 8;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
 }

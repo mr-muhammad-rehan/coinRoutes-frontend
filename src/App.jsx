@@ -1,5 +1,4 @@
-import "./app.css";
-import { useSelector } from "react-redux";
+import "./app.css"; 
 import CurrencyPairSelector from "./components/currencyPairSelector";
 import OrderBook from "./components/orderBook";
 import TradeHistory from "./components/tradeHistory";
@@ -20,7 +19,7 @@ function App() {
       <hr />
       <div className="home-container">
         <OrderBook />
-        <PriceChart />
+        <PriceChart isConnected={isConnected}  />
         <TradeHistory />
       </div>
 

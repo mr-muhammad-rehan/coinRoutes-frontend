@@ -1,13 +1,16 @@
+import "../styles/tradeHistory.css";
 import { useSelector } from "react-redux";
 import { formatDate } from "../utils";
-import "../styles/tradeHistory.css";
+import { SYSTEM_ENVIRONMENT } from "../config";
 import LoadingBar from "./loadingBar";
 
 const TradeHistory = () => {
   const { tradeHistory, isLoading } = useSelector(
     (state) => state.tradeHistory
   );
-  const currencyPair = useSelector((state) => state.orderBooks.currencyPair);
+  const { currencyPair, systemEnvironment } = useSelector(
+    (state) => state.orderBooks
+  );
 
   return (
     <div className="trade-history">
@@ -21,14 +24,28 @@ const TradeHistory = () => {
         <h5 className="trade-history-header-title-element">Time</h5>
       </div>
 
-      {isLoading ? (
-        <div className="trade-history-loading">
-          <LoadingBar />
+      {systemEnvironment === SYSTEM_ENVIRONMENT.MAIN_NET ? (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+          }}
+        >
+          <span style={{ color: "yellow" }}>Cannot display on Main_Net</span>
         </div>
       ) : (
-        tradeHistory.map((trade, index) => (
-          <TradeHistoryRow key={`trade-${index}`} trade={trade} />
-        ))
+        <>
+          {isLoading ? (
+            <div className="trade-history-loading">
+              <LoadingBar />
+            </div>
+          ) : (
+            tradeHistory.map((trade, index) => (
+              <TradeHistoryRow key={`trade-${index}`} trade={trade} />
+            ))
+          )}
+        </>
       )}
     </div>
   );
