@@ -6,7 +6,7 @@
   color: white;
   background-color: #151518;
   overflow-y: scroll;
-  scrollbar-width: thin; 
+  scrollbar-width: thin;
   scrollbar-color: #6e6d6d #2c2c2d;
 }
 
@@ -31,20 +31,24 @@
 .trade-history-header-title-element {
   margin: 0;
   width: 60px;
-}  
+}
 
 .trade-history-header-element {
   margin: 0;
   width: 74px;
-}  
+}
 
 .trade-history-size,
 .trade-history-time {
-  font-size: 14px;
+  font-size: 11px;
   width: 60px;
 }
 
-.trade-history-price{
+.trade-history-price {
   width: 100px;
   text-wrap: nowrap;
+}
+
+.arrow {
+  font-size: 10px;
 }

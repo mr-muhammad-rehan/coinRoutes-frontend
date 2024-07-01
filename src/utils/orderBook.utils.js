@@ -1,16 +1,26 @@
 import { getWebSocketAuth } from './general.utils';
+import { SYSTEM_ENVIRONMENT } from '../config';
 
 const apiKey = import.meta.env.VITE_COINBASE_API_KEY;
 const passphrase = import.meta.env.VITE_COINBASE_PASSPHRASE;
 
-export function getOrderBookSubMessage({ currencyPair, channels = ['level2_batch', 'ticker'] }) {
+export function getOrderBookSubMessage({ currencyPair, channels = ['level2_batch', 'ticker'], environment = SYSTEM_ENVIRONMENT.TEST_NET }) {
     const timestamp = Math.floor(Date.now() / 1000).toString();
     const signature = getWebSocketAuth(timestamp);
+    let subscription = {
+        type: 'subscribe',
+        product_ids: [currencyPair],
+        channels: channels,
+    };
+
+    if (environment === SYSTEM_ENVIRONMENT.MAIN_NET) {
+        return JSON.stringify(subscription);
+    }
 
     return JSON.stringify({
         type: 'subscribe',
         product_ids: [currencyPair],
-        channels: ['full'],
+        channels: [...channels, 'full'],
         signature: signature,
         key: apiKey,
         passphrase: passphrase,
@@ -26,12 +36,30 @@ export function getOrderBookUnSubMessage({ currencyPair, channels = ['level2_bat
     });
 }
 
-export function filterNewBooks({ currentAsks, currentBids, newAsks, newBids }) {
-    let updatedAsks = [...newAsks, ...currentAsks];
-    let updatedBids = [...newBids, ...currentBids];
+export function filterNewBooks(currentAsks, currentBids, newAsks, newBids) {
+    let updatedAsks = [...currentAsks];
+    let updatedBids = [...currentBids];
 
-    updatedBids.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
-    updatedAsks.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+    const updateOrders = (orders, changes, isBid) => {
+        changes.forEach(change => {
+            const { price, marketSize, timestamp } = change;
+            const index = orders.findIndex(order => order.price === price);
+            if (index !== -1) {
+                if (parseFloat(marketSize) === 0.0) {
+                    orders.splice(index, 1);
+                } else {
+                    orders[index] = { price, marketSize, timestamp };
+                }
+            } else if (parseFloat(marketSize) !== 0.0) {
+                orders.push({ price, marketSize, timestamp });
+            }
+        });
+
+        orders.sort((a, b) => isBid ? parseFloat(b.price) - parseFloat(a.price) : parseFloat(a.price) - parseFloat(b.price));
+    };
+
+    updateOrders(updatedBids, newBids, true);
+    updateOrders(updatedAsks, newAsks, false);
 
     return { updatedBids, updatedAsks };
 }
@@ -73,3 +101,12 @@ export function calculateAggregationRange(bids, asks) {
     }
 }
 
+export function createOrderBooksFromList(orders, timestamp, isAsk) {
+    //create key value object
+    const createBookObject = (book, timestamp) => {
+        return { price: book[1], marketSize: book[0], timestamp: timestamp }
+    }
+    const data = orders.map(order => createBookObject(order, timestamp));
+    data.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+    return data;
+}

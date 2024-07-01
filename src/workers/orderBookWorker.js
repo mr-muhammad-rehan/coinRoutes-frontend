@@ -1,33 +1,24 @@
-// src/workers/orderBookWorker.js
-
+import { createOrderBooksFromList, filterNewBooks } from '../utils/orderBook.utils';
 self.onmessage = function (e) {
-  const { newMessage, asks, bids } = e.data;
+  const message = e.data;
+  const timestamp = new Date(message.time).getTime();
 
-  let updatedAsks = new Map();
-  let updatedBids = new Map();
+  //if initial data
+  if (message.type == "snapshot") {
+    const asks = createOrderBooksFromList(message.asks, timestamp, true).reverse();
+    const bids = createOrderBooksFromList(message.bids, timestamp);
+    self.postMessage({ asks: asks, bids: bids });
 
-  // console.log('Asks:', asks, 'Bids:', bids);
-
-  if (newMessage.type === "open" || newMessage.type === "filled") {
-    if (newMessage.side === "buy") {
-      updatedAsks = appendAsks(asks, newMessage);
-    } else if (newMessage.side === 'sell') {
-      updatedBids = appendBids(bids, newMessage);
-    }
-  } else if (newMessage.type === "done") {
-    if (newMessage.maker_side === "buy") {
-      if (asks.delete(newMessage.order_id)) {
-        updatedAsks = appendAsks(asks);
-      }
-    } else if (newMessage.maker_side === 'sell') {
-      if (bids.delete(newMessage.order_id)) {
-        updatedBids = appendBids(bids);
-      }
-    }
+    //If an update message
+  } else if (message.type == 'l2update') {
+    let newBids = message.changes.filter((order) => order[0] == 'buy').map((ask) => createBookObject(ask, timestamp));
+    let newAsks = message.changes.filter((order) => order[0] == 'sell').map((bid) => createBookObject(bid, timestamp));
+    const { updatedBids, updatedAsks } = filterNewBooks(message.currentAsks, message.currentBids, newAsks, newBids);
+    self.postMessage({ asks: updatedAsks.reverse(), bids: updatedBids });
   }
-  // console.log('updatedAsks:', updatedAsks, 'updatedBids:', updatedBids);
 
-  // Send the result back to the main thread
-  self.postMessage({ asks: updatedAsks, bids: updatedBids });
 };
 
+function createBookObject(book, timestamp) {
+  return { price: book[1], marketSize: book[2], timestamp: timestamp }
+}

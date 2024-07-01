@@ -1,14 +1,14 @@
-import { useDispatch, useSelector } from "react-redux"; 
+import { useSelector } from "react-redux";
 import { formatDate } from "../utils";
 import "../styles/tradeHistory.css";
 import LoadingBar from "./loadingBar";
 
 const TradeHistory = () => {
-  const dispatch = useDispatch();
-  const tradeHistory = useSelector((state) => state.tradeHistory.tradeHistory);
+  const { tradeHistory, isLoading } = useSelector(
+    (state) => state.tradeHistory
+  );
   const currencyPair = useSelector((state) => state.orderBooks.currencyPair);
 
- 
   return (
     <div className="trade-history">
       <h3>Trade History</h3>
@@ -21,7 +21,7 @@ const TradeHistory = () => {
         <h5 className="trade-history-header-title-element">Time</h5>
       </div>
 
-      {tradeHistory.length <= 0 ? (
+      {isLoading ? (
         <div className="trade-history-loading">
           <LoadingBar />
         </div>
@@ -36,7 +36,7 @@ const TradeHistory = () => {
 
 const TradeHistoryRow = ({ trade }) => (
   <div className="trade-history-row">
-    <span className="trade-history-size">{Number(trade.size).toFixed(4)}</span>
+    <span className="trade-history-size">{Number(trade.size).toFixed(8)}</span>
     <span
       className="trade-history-price"
       style={{
@@ -44,7 +44,9 @@ const TradeHistoryRow = ({ trade }) => (
       }}
     >
       {Number(trade.price).toFixed(2)}{" "}
-      {trade.side.toUpperCase() === "SELL" ? "↘" : "↗"}
+      <span className="arrow">
+        {trade.side.toUpperCase() === "SELL" ? "↘" : "↗"}
+      </span>
     </span>
     <span className="trade-history-time">{formatDate(trade.time)}</span>
   </div>

@@ -1,69 +1,85 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getOrderBookSubMessage, getOrderBookUnSubMessage } from "../utils";
-import { COINBASE_SOCKET_URL } from "../config";
-import { setOrderBook } from "../store/actions/orderBookActions";
-
+import {
+  setOrderBook,
+  setBestOrderBook,
+  resetOrderBook
+} from "../store/actions/orderBookActions";
+import { updateTradeHistory, resetTradeHistory } from "../store/actions/tradeHistoryActions";
 import Worker from "../workers/orderBookWorker?worker";
-
-function appendAsks(asks, newMessage) {
-  const updatedAsks = new Map(asks);
-  updatedAsks.set(newMessage.order_id, newMessage);
-  return updatedAsks;
-}
+import TaskQueue from "../utils/taskQueue";
+import {
+  COINBASE_SOCKET_URL,
+  COINBASE_SANDBOX_SOCKET_URL,
+  SYSTEM_ENVIRONMENT,
+} from "../config";
 
 const useWebSocket = () => {
   const dispatch = useDispatch();
-  const { currencyPair, asks, bids } = useSelector((state) => state.orderBooks);
-  const [isConnected, setIsConnected] = useState(false);
+  
+  const { currencyPair, systemEnvironment, asks, bids } = useSelector(
+    (state) => state.orderBooks
+  );
+  const [isConnected, setIsConnected] = useState(false); 
 
   const webSocket = useRef(null);
-  let count = 0;
+  const asksRef = useRef(asks);
+  const bidsRef = useRef(bids);
+  const taskQueue = useRef(new TaskQueue(500)); // Intervals as to process a task ( can be adjusted)
+
+  const pushAsksAndBids = (message) => {
+    const { bids, asks } = message.data;
+    dispatch(setOrderBook({ asks, bids }));
+  };
+
+  useEffect(() => {
+    asksRef.current = asks || [];
+    bidsRef.current = bids || [];
+  }, [asks, bids]);
 
   useEffect(() => {
     const worker = new Worker();
 
-    // worker.onmessage = function (e) {
-    //   // console.log("Main thread received result from worker:", e.data);
-    //   dispatch(setOrderBook({ bids: e.data.bids, asks: e.data.asks }));
-    // };
+    worker.onmessage = pushAsksAndBids;
 
     const connectWebSocket = () => {
-      webSocket.current = new WebSocket(COINBASE_SOCKET_URL);
+      const webSocketUrl =
+        systemEnvironment === SYSTEM_ENVIRONMENT.MAIN_NET
+          ? COINBASE_SOCKET_URL
+          : COINBASE_SANDBOX_SOCKET_URL;
+      webSocket.current = new WebSocket(webSocketUrl);
 
       webSocket.current.onopen = () => {
         setIsConnected(true);
         if (webSocket.current.readyState === WebSocket.OPEN) {
-          webSocket.current.send(getOrderBookSubMessage({ currencyPair }));
+          const message = getOrderBookSubMessage({
+            currencyPair: currencyPair,
+            environment: systemEnvironment,
+          });
+          webSocket.current.send(message);
         }
       };
 
       webSocket.current.onmessage = (event) => {
-        const newMessage = JSON.parse(event.data);
+        const data = JSON.parse(event.data);
 
-        if (newMessage.type === "open" || newMessage.type === "filled") {
-          if (newMessage.side === "buy") {
-            updatedAsks = appendAsks(asks, newMessage);
-          } else if (newMessage.side === "sell") {
-            updatedBids = appendBids(bids, newMessage);
-          }
-        } else if (newMessage.type === "done") {
-          if (newMessage.maker_side === "buy") {
-            if (asks.delete(newMessage.order_id)) {
-              updatedAsks = appendAsks(asks);
-            }
-          } else if (newMessage.maker_side === "sell") {
-            if (bids.delete(newMessage.order_id)) {
-              updatedBids = appendBids(bids);
-            }
-          }
-        }
-
-        dispatch(setOrderBook({ bids: updatedAsks, asks: updatedBids }));
-
-        count++;
-        if (count > 50) {
-          disconnectWebSocket();
+        if (data.type === "match") {
+          dispatch(updateTradeHistory(data));
+        } else if (data.type === "snapshot") {
+          taskQueue.current.addTask(() => {
+            worker.postMessage(data);
+          });
+        } else if (data.type === "l2update") {
+          taskQueue.current.addTask(() => {
+            worker.postMessage({
+              ...data,
+              currentAsks: asksRef.current,
+              currentBids: bidsRef.current,
+            });
+          });
+        } else if (data.type === "ticker") {
+          dispatch(setBestOrderBook(data));
         }
       };
 
@@ -83,6 +99,9 @@ const useWebSocket = () => {
           webSocket.current.send(getOrderBookUnSubMessage({ currencyPair }));
           console.log("Unsubscribed from", currencyPair);
         }
+        taskQueue.current.stop();
+        dispatch(resetOrderBook());
+        dispatch(resetTradeHistory());
         webSocket.current.close();
       }
     };
@@ -92,9 +111,9 @@ const useWebSocket = () => {
 
     return () => {
       disconnectWebSocket();
-      worker.terminate(); // Clean up the worker when the component unmounts
+      worker.terminate(); // Clean worker to avoid leakage
     };
-  }, [currencyPair, dispatch]);
+  }, [currencyPair, systemEnvironment, dispatch]);
 
   const sendMessage = useCallback((message) => {
     if (webSocket.current && webSocket.current.readyState === WebSocket.OPEN) {

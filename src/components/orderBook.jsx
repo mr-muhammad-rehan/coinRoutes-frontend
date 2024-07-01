@@ -7,10 +7,9 @@ import "../styles/orderBook.css";
 const DEFAULT_AGGREGATION_AMOUNT = 0.00001;
 
 const OrderBook = () => {
-  const { bids, asks, bestAsk, bestBid } = useSelector(
+  const { bids, asks, bestAsk, bestBid, currencyPair, isLoading } = useSelector(
     (state) => state.orderBooks
   );
-  const currencyPair = useSelector((state) => state.orderBooks.currencyPair);
   const [aggregation, setAggregation] = useState(DEFAULT_AGGREGATION_AMOUNT);
   const [aggregationAmount, setAggregationAmount] = useState(
     DEFAULT_AGGREGATION_AMOUNT
@@ -58,7 +57,7 @@ const OrderBook = () => {
             <h5>Price ({currencyPair.split("-")[1]})</h5>
           </div>
 
-          {aggregatedAsks.length <= 0 ? (
+          {isLoading ? (
             <div className="order-book-loading">
               <LoadingBar />
             </div>
@@ -72,7 +71,7 @@ const OrderBook = () => {
             {currencyPair.split("-")[1]} Spread {spread}
           </p>
 
-          {aggregatedBids.length <= 0 ? (
+          {isLoading ? (
             <div className="order-book-loading">
               <LoadingBar />
             </div>

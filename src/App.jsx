@@ -4,6 +4,7 @@ import CurrencyPairSelector from "./components/currencyPairSelector";
 import OrderBook from "./components/orderBook";
 import TradeHistory from "./components/tradeHistory";
 import PriceChart from "./components/priceChart";
+import Header from "./components/header";
 import useWebSocket from "./customHooks/useWebSocket";
 
 function App() {
@@ -11,18 +12,16 @@ function App() {
 
   return (
     <div>
-      <h1 style={{ color: "white", display: "flex", justifyContent: "center" }}>
-        CoinRoutes Frontend Test
-      </h1>
+      <Header isConnected={isConnected} />
       <hr />
       <div className="price-selection">
         <CurrencyPairSelector />
       </div>
       <hr />
       <div className="home-container">
-        {/* <OrderBook />
-        <PriceChart /> */}
-        {/* <TradeHistory /> */}
+        <OrderBook />
+        <PriceChart />
+        <TradeHistory />
       </div>
 
       <div className="footer">
